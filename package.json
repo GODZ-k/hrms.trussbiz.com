@@ -10,24 +10,29 @@
     "prisma:generate": "prisma generate --schema=packages/db/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=packages/db/schema.prisma",
     "prisma:studio": "prisma studio --schema=packages/db/schema.prisma",
+    "prisma:migrate:prod": "prisma migrate deploy --schema=packages/db/schema.prisma",
     "prisma:db:push": "prisma db push --schema=packages/db/schema.prisma",
-    "prisma:db:studio": "prisma studio --schema=packages/db/schema.prisma"
+    "prisma:db:studio": "prisma studio --schema=packages/db/schema.prisma",
+    "prisma:db:seed": "prisma db seed --schema=packages/db/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.474.0",
     "next": "15.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/dotenv": "^6.1.1",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
