@@ -19,24 +19,35 @@ enum Gender {
   other
 }
 
+enum Role {
+  ADMIN
+  HR
+  EMPLOYEE
+}
+
 model Employee {
-  id                     String                   @id @default(uuid())
-  isActive              Boolean                  @default(true)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @default(now())
-  personalDetails       EmployeePersonalDetails?
-  contactDetails        EmployeeContactDetails?
-  details               EmployeeDetails?
-  leaves                EmployeeLeave[]
-  attendance            EmployeeAttendance[]
+  id              String                   @id @default(uuid())
+  isActive        Boolean                  @default(true)
+  username        String
+  password        String
+  role            Role                     @default(EMPLOYEE)
+  createdAt       DateTime                 @default(now()) @db.Timestamptz()
+  updatedAt       DateTime                 @updatedAt @db.Timestamptz()
+  personalDetails EmployeePersonalDetails?
+  contact         EmployeeContact?
+  // details         EmployeeDetails?
+  identificationDetails EmployeeIdentificationDetails?
+  academicDetails EmployeeAcademics?
+  // leaves          EmployeeLeave[]
+  // attendance      EmployeeAttendance[]
 }
 
 model Department {
   id                 String               @id @default(uuid())
   name               String               @db.VarChar(255)
-  isActive          Boolean              @default(true)
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @default(now())
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now()) @db.Timestamptz()
+  updatedAt          DateTime             @updatedAt @db.Timestamptz()
   departmentPosition DepartmentPosition[]
   employeeDetails    EmployeeDetails[]
 }
@@ -44,9 +55,9 @@ model Department {
 model Position {
   id                 String               @id @default(uuid())
   name               String               @db.VarChar(255)
-  isActive          Boolean              @default(true)
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @default(now())
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now()) @db.Timestamptz()
+  updatedAt          DateTime             @updatedAt @db.Timestamptz()
   departmentPosition DepartmentPosition[]
   employeeDetails    EmployeeDetails[]
 }
@@ -55,68 +66,110 @@ model DepartmentPosition {
   id           String     @id @default(uuid())
   departmentId String
   positionId   String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now())
+  createdAt    DateTime   @default(now()) @db.Timestamptz()
+  updatedAt    DateTime   @updatedAt @db.Timestamptz()
   department   Department @relation(fields: [departmentId], references: [id])
   position     Position   @relation(fields: [positionId], references: [id])
 }
 
 model EmployeePersonalDetails {
-  id          String    @id @default(uuid())
-  employeeId  String    @unique
-  firstName   String    @db.VarChar(255)
-  middleName  String?   @db.VarChar(255)
-  lastName    String?   @db.VarChar(255)
-  gender      Gender
-  fatherName  String    @db.VarChar(255)
-  motherName  String    @db.VarChar(255)
-  bloodGroup  String?   @db.VarChar(5)
-  avatar      String
-  dateOfBirth DateTime  @db.Date
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  employee    Employee  @relation(fields: [employeeId], references: [id])
-}
-
-model EmployeeContactDetails {
   id          String   @id @default(uuid())
   employeeId  String   @unique
-  phoneNumber String   @db.VarChar(255)
-  email       String   @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  firstName   String   @db.VarChar(255)
+  middleName  String?  @db.VarChar(255)
+  lastName    String?  @db.VarChar(255)
+  gender      Gender
+  fatherName  String   @db.VarChar(255)
+  motherName  String   @db.VarChar(255)
+  bloodGroup  String?  @db.VarChar(5)
+  avatar      String
+  dateOfBirth String
+  createdAt   DateTime @default(now()) @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @db.Timestamptz()
   employee    Employee @relation(fields: [employeeId], references: [id])
 }
 
-model EmployeeDetails {
-  id           String     @id @default(uuid())
-  employeeId   String     @unique
-  firstName    String
-  lastName     String
-  departmentId String
-  positionId   String
-  salary       Int
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now())
-  employee     Employee   @relation(fields: [employeeId], references: [id])
-  department   Department @relation(fields: [departmentId], references: [id])
-  position     Position   @relation(fields: [positionId], references: [id])
+model EmployeeContact {
+  id          String   @id @default(uuid())
+  employeeId  String   @unique
+  email       String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  mobile EmployeeMobileNo[]
 }
 
-model EmployeeLeave {
-  id         String   @id @default(uuid())
-  employeeId String
-  leaveType  String
-  startDate  DateTime @db.Date
-  endDate    DateTime @db.Date
-  employee   Employee @relation(fields: [employeeId], references: [id])
+enum MobileType {
+  PERSONAL
+  EMERGENCY
+  OFFICIAL
 }
 
-model EmployeeAttendance {
-  id         String   @id @default(uuid())
-  employeeId String
-  date       DateTime @db.Date
-  status     String
-  employee   Employee @relation(fields: [employeeId], references: [id])
+enum Relation {
+  SELF
+  PARENT
+  SPOUSE
+  CHILD
 }
 
+model EmployeeMobileNo {
+  id String @id @default(uuid())
+  employeeContactId String
+  mobileNo String
+  mobileType MobileType @default(PERSONAL)
+  relation Relation @default(PARENT)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  employeeContact EmployeeContact @relation(fields: [employeeContactId], references: [id])
+}
+
+model EmployeeIdentificationDetails {
+  id String @id @default(uuid())
+  employeeId String @unique
+  aadharNo String @db.VarChar(12)
+  panNo String @db.VarChar(10)
+  aadharCard String
+  panCard String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  employee Employee @relation(fields: [employeeId], references: [id])
+}
+
+
+model EmployeeAcademics {
+  id String @id @default(uuid())
+  employeeId String @unique
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  employee Employee @relation(fields: [employeeId], references: [id])
+}
+
+// model EmployeeDetails {
+//   id           String     @id @default(uuid())
+//   employeeId   String     @unique
+//   departmentId String
+//   positionId   String
+//   salary       Int
+//   createdAt    DateTime   @default(now())
+//   updatedAt    DateTime   @default(now())
+//   employee     Employee   @relation(fields: [employeeId], references: [id])
+//   department   Department @relation(fields: [departmentId], references: [id])
+//   position     Position   @relation(fields: [positionId], references: [id])
+// }
+
+// model EmployeeLeave {
+//   id         String   @id @default(uuid())
+//   employeeId String
+//   leaveType  String
+//   startDate  DateTime @db.Date
+//   endDate    DateTime @db.Date
+//   employee   Employee @relation(fields: [employeeId], references: [id])
+// }
+
+// model EmployeeAttendance {
+//   id         String   @id @default(uuid())
+//   employeeId String
+//   date       DateTime @db.Date
+//   status     String
+//   employee   Employee @relation(fields: [employeeId], references: [id])
+// }
