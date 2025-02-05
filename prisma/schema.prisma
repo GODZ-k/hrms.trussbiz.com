@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,11 +29,31 @@ model Employee {
   updatedAt       DateTime                 @updatedAt @db.Timestamptz()
   personalDetails EmployeePersonalDetails?
   contact         EmployeeContact?
-  // details         EmployeeDetails?
   identificationDetails EmployeeIdentificationDetails?
   academicDetails EmployeeAcademics?
-  // leaves          EmployeeLeave[]
-  // attendance      EmployeeAttendance[]
+
+
+  EmployeeHistory EmployeeHistory[]
+
+  EmployeeSalary EmployeeSalary[]
+
+  EmployeeBankDetails EmployeeBankDetails[]
+
+  EmployeeLeave EmployeeLeave[]
+
+
+  Attendance Attendance[]
+
+  EmployeeAddress EmployeeAddress[]
+
+  EmergencyContact EmergencyContact[]
+
+  EmployeeJobDetails EmployeeJobDetails[]
+
+  EmployeeSkills EmployeeSkills[]
+
+  managedHierarchies EmployeeHierarchy[] @relation("ManagerToHierarchy")
+  employeeHierarchies EmployeeHierarchy[] @relation("EmployeeToHierarchy")
 }
 
 model Department {
@@ -49,7 +63,9 @@ model Department {
   createdAt          DateTime             @default(now()) @db.Timestamptz()
   updatedAt          DateTime             @updatedAt @db.Timestamptz()
   departmentPosition DepartmentPosition[]
-  employeeDetails    EmployeeDetails[]
+  // employeeDetails    EmployeeDetails[]
+
+  EmployeeJobDetails EmployeeJobDetails[]
 }
 
 model Position {
@@ -59,7 +75,9 @@ model Position {
   createdAt          DateTime             @default(now()) @db.Timestamptz()
   updatedAt          DateTime             @updatedAt @db.Timestamptz()
   departmentPosition DepartmentPosition[]
-  employeeDetails    EmployeeDetails[]
+  // employeeDetails    EmployeeDetails[]
+
+  EmployeeJobDetails EmployeeJobDetails[]
 }
 
 model DepartmentPosition {
@@ -79,15 +97,16 @@ model EmployeePersonalDetails {
   middleName  String?  @db.VarChar(255)
   lastName    String?  @db.VarChar(255)
   gender      Gender
-  fatherName  String   @db.VarChar(255)
-  motherName  String   @db.VarChar(255)
+  fatherName  String?   @db.VarChar(255)
+  motherName  String?   @db.VarChar(255)
   bloodGroup  String?  @db.VarChar(5)
-  avatar      String
+  avatar      String?
   dateOfBirth String
   createdAt   DateTime @default(now()) @db.Timestamptz()
   updatedAt   DateTime @updatedAt @db.Timestamptz()
   employee    Employee @relation(fields: [employeeId], references: [id])
 }
+
 
 model EmployeeContact {
   id          String   @id @default(uuid())
@@ -123,13 +142,77 @@ model EmployeeMobileNo {
   employeeContact EmployeeContact @relation(fields: [employeeContactId], references: [id])
 }
 
+model EmergencyContact {
+  id           String   @id @default(uuid())
+  employeeId   String   
+  name         String   @db.VarChar(255)
+  relation     Relation @default(PARENT)
+  phoneNumber  String   @db.VarChar(15)
+  isPrimary    Boolean  @default(false)
+
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+
+  employee     Employee @relation(fields: [employeeId], references: [id])
+}
+
+model EmployeeSkills {
+  id            String   @id @default(uuid())
+  employeeId    String
+  skillName     String   @db.VarChar(255)
+  proficiency   SkillLevel
+  yearsOfExperience Int?
+
+  createdAt     DateTime @default(now()) @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @db.Timestamptz()
+  
+  employee      Employee @relation(fields: [employeeId], references: [id])
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model EmployeeHierarchy {
+  id              String   @id @default(uuid())
+  employeeId      String
+  managerId       String?
+
+  createdAt       DateTime @default(now()) @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @db.Timestamptz()
+  
+  employee        Employee @relation("EmployeeToHierarchy", fields: [employeeId], references: [id])
+  manager         Employee? @relation("ManagerToHierarchy", fields: [managerId], references: [id])
+}
+model EmployeeJobDetails {
+  id                 String   @id @default(uuid())
+  employeeId         String   @unique
+  joiningDate        DateTime @db.Date
+  probationEndDate   DateTime? @db.Date
+  confirmationDate   DateTime? @db.Date
+  departmentId       String
+  positionId         String
+
+  createdAt          DateTime @default(now()) @db.Timestamptz()
+  updatedAt          DateTime @updatedAt @db.Timestamptz()
+
+  employee           Employee @relation(fields: [employeeId], references: [id])
+  department         Department @relation(fields: [departmentId], references: [id])
+  position          Position @relation(fields: [positionId], references: [id])
+}
+
+
 model EmployeeIdentificationDetails {
   id String @id @default(uuid())
   employeeId String @unique
+  photo_id_card String?
   aadharNo String @db.VarChar(12)
-  panNo String @db.VarChar(10)
-  aadharCard String
-  panCard String
+  panNo String? @db.VarChar(10)
+  aadharCard String?
+  panCard String?
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   employee Employee @relation(fields: [employeeId], references: [id])
@@ -139,37 +222,175 @@ model EmployeeIdentificationDetails {
 model EmployeeAcademics {
   id String @id @default(uuid())
   employeeId String @unique
+  qualification_10th String?
+  qualification_12th String?
+  qualification_degree String?
+  qualification_post_graduation String?
+  qualification_other_qualification String?
+  qualification_another_certificate String?
+  photo_qualification_10th String?
+  photo_qualification_12th String?
+  photo_degree String?
+  photo_post_graduation String?
+  photo_other_qualification String?
+  photo_another_certificate String?
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
   employee Employee @relation(fields: [employeeId], references: [id])
+
+
+}
+model EmployeeHistory {
+  id String @id @default(uuid())
+  employeeId String @unique
+  previous_joining_letter String?
+  previous_experience_letter String?
+  last_company_salary_slip String?
+  last_company_experience_letter String?
+  last_company_offer_letter String?
+  last_company_joining_letter String?
+  last_company_relieving_letter String?
+  cover_letter String? @db.Text
+  createdAt DateTime @default(now()) @db.Timestamptz()  
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  employee Employee @relation(fields: [employeeId], references: [id])
+
 }
 
-// model EmployeeDetails {
-//   id           String     @id @default(uuid())
-//   employeeId   String     @unique
-//   departmentId String
-//   positionId   String
-//   salary       Int
-//   createdAt    DateTime   @default(now())
-//   updatedAt    DateTime   @default(now())
-//   employee     Employee   @relation(fields: [employeeId], references: [id])
-//   department   Department @relation(fields: [departmentId], references: [id])
-//   position     Position   @relation(fields: [positionId], references: [id])
-// }
+model EmployeeSalary {
+  id              String   @id @default(uuid())
+  employeeId      String   
+  basicSalary     Int     
+  allowances      Int      @default(0) 
+  deductions      Int      @default(0) 
+  overtimePay     Int?     @default(0) 
+  tax             Int?     @default(0)
+  providentFund   Int?     @default(0) 
+  healthInsurance Int?     @default(0)
+  loanDeduction   Int?     @default(0) 
+  bonus           Int?     @default(0) 
+  workingDays     Int      @default(0) 
+  leaveDays       Int?     @default(0) 
+  overtimeHours   Int?     @default(0) 
+  taxableIncome   Int?     @default(0) 
+  netSalary       Int      
+  salaryMonth     String   
+  remarks         String?  
 
-// model EmployeeLeave {
-//   id         String   @id @default(uuid())
-//   employeeId String
-//   leaveType  String
-//   startDate  DateTime @db.Date
-//   endDate    DateTime @db.Date
-//   employee   Employee @relation(fields: [employeeId], references: [id])
-// }
+  createdAt       DateTime @default(now()) @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @db.Timestamptz()
 
-// model EmployeeAttendance {
-//   id         String   @id @default(uuid())
-//   employeeId String
-//   date       DateTime @db.Date
-//   status     String
-//   employee   Employee @relation(fields: [employeeId], references: [id])
-// }
+  employee        Employee @relation(fields: [employeeId], references: [id])
+}
+
+model EmployeeBankDetails {
+  id String @id @default(uuid())
+  employeeId String @unique
+  bank_name String?
+  bank_account_number String?
+  bank_ifsc_code String?
+  bank_branch_name String?
+  bank_account_holder_name String?
+  bank_account_type BankAccountType @default(CURRENT)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+
+}
+
+model EmployeeAddress {
+  id           String  @id @default(uuid())
+  employeeId   String  @unique
+  addressLine1 String  @db.VarChar(255)
+  addressLine2 String? @db.VarChar(255)
+  city         String  @db.VarChar(100)
+  state        String  @db.VarChar(100)
+  country      String  @db.VarChar(100)
+  zipCode      String  @db.VarChar(10)
+  addressType  AddressType @default(CURRENT)
+
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
+  
+  employee     Employee @relation(fields: [employeeId], references: [id])
+}
+
+enum AddressType {
+  CURRENT
+  PERMANENT
+}
+
+
+enum BankAccountType {
+  CURRENT
+  SAVINGS
+}
+
+enum LeaveType {
+  SICK
+  VACATION
+  CASUAL
+  MATERNITY
+  PARENTAL
+  BEREAVEMENT
+  WEDDING
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+model EmployeeLeave {
+  id            String     @id @default(uuid())
+  employeeId    String     @db.VarChar(255)
+  leave_type    LeaveType  @default(SICK)
+  start_date    DateTime   @db.Date
+  end_date      DateTime   @db.Date
+  leave_days    Int        @default(0) 
+  reason        String?    
+  status        LeaveStatus @default(PENDING) 
+  isPaidLeave   Boolean    @default(true) 
+  approvedBy    String?    
+  decisionDate  DateTime?  
+
+  createdAt     DateTime   @default(now()) @db.Timestamptz()
+  updatedAt     DateTime   @updatedAt @db.Timestamptz()
+
+  employee      Employee   @relation(fields: [employeeId], references: [id])
+}
+
+
+model Attendance {
+  id String @id @default(uuid())
+  employeeId String
+  date DateTime @db.Date
+  status AttendanceStatus @default(PRESENT)
+  in_time DateTime @db.Time
+  out_time DateTime @db.Time
+  total_hours Int
+  total_minutes Int
+  
+  createdAt DateTime @default(now()) @db.Timestamptz()  
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  @@index([employeeId])
+}
+enum AttendanceStatus{
+  PRESENT
+  ABSENT
+  LEAVE
+  HOLIDAY
+  PARTIAL_PRESENT
+}
+
+
+
