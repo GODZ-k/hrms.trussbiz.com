@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid input data" , success: false }, { status: 400 });
     }
 
-    return NextResponse.json({})
 
    
 }
