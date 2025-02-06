@@ -11,10 +11,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid input data" , success: false }, { status: 400 });
     }
 
-    const employee = await prisma.employeePersonalDetails.create({
-        data: { ...payload }
-    })
-
    
-    return NextResponse.json({ employee }, { status: 200});
 }
